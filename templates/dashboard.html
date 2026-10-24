@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>My applications</h2>
+    <a href="{{ url_for('add') }}" class="btn btn-primary">+ Add application</a>
+</div>
+
+{% if applications %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover bg-white align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in applications %}
+            <tr>
+                <td>{{ a['company'] }}</td>
+                <td>{{ a['role'] }}</td>
+                <td>
+                    <span class="badge
+                        {% if a['status'] == 'Offer' %}bg-success
+                        {% elif a['status'] == 'Interview' %}bg-warning text-dark
+                        {% elif a['status'] == 'Rejected' %}bg-danger
+                        {% else %}bg-primary{% endif %}">
+                        {{ a['status'] }}
+                    </span>
+                </td>
+                <td>{{ a['applied_date'] or '-' }}</td>
+                <td>{{ a['notes'] or '' }}</td>
+                <td>
+                    <a href="{{ url_for('edit', app_id=a['id']) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <form method="POST" action="{{ url_for('delete', app_id=a['id']) }}"
+                          class="d-inline" onsubmit="return confirm('Delete this application?');">
+                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">No applications yet. Click "Add application" to start.</div>
+{% endif %}
+{% endblock %}
