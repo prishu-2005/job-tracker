@@ -105,11 +105,41 @@ def logout():
 @login_required
 def home():
     db = get_db()
-    applications = db.execute(
-        "SELECT * FROM applications WHERE user_id = ? ORDER BY id DESC",
+    status_filter = request.args.get("status", "")
+
+    # Counts for the cards at the top (always for ALL of this user's applications)
+    rows = db.execute(
+        "SELECT status, COUNT(*) AS total FROM applications "
+        "WHERE user_id = ? GROUP BY status",
         (session["user_id"],),
     ).fetchall()
-    return render_template("dashboard.html", applications=applications)
+    counts = {s: 0 for s in STATUSES}
+    for r in rows:
+        counts[r["status"]] = r["total"]
+    total = sum(counts.values())
+
+    # List, optionally filtered by status
+    if status_filter in STATUSES:
+        applications = db.execute(
+            "SELECT * FROM applications WHERE user_id = ? AND status = ? "
+            "ORDER BY id DESC",
+            (session["user_id"], status_filter),
+        ).fetchall()
+    else:
+        status_filter = ""
+        applications = db.execute(
+            "SELECT * FROM applications WHERE user_id = ? ORDER BY id DESC",
+            (session["user_id"],),
+        ).fetchall()
+
+    return render_template(
+        "dashboard.html",
+        applications=applications,
+        counts=counts,
+        total=total,
+        statuses=STATUSES,
+        status_filter=status_filter,
+    )
 
 
 @app.route("/add", methods=["GET", "POST"])

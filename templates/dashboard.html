@@ -1,8 +1,64 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>My applications</h2>
-    <a href="{{ url_for('add') }}" class="btn btn-primary">+ Add application</a>
+
+<!-- Count cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="fs-2 fw-bold">{{ total }}</div>
+                <div class="text-muted">Total</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-primary">{{ counts['Applied'] }}</div>
+                <div class="text-muted">Applied</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-center shadow-sm border-warning">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-warning">{{ counts['Interview'] }}</div>
+                <div class="text-muted">Interview</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-center shadow-sm border-success">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-success">{{ counts['Offer'] }}</div>
+                <div class="text-muted">Offer</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card text-center shadow-sm border-danger">
+            <div class="card-body">
+                <div class="fs-2 fw-bold text-danger">{{ counts['Rejected'] }}</div>
+                <div class="text-muted">Rejected</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Header + filter -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h2 class="mb-0">My applications</h2>
+    <div class="d-flex gap-2">
+        <form method="GET" class="d-flex gap-2">
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All statuses</option>
+                {% for s in statuses %}
+                    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <a href="{{ url_for('add') }}" class="btn btn-primary text-nowrap">+ Add application</a>
+    </div>
 </div>
 
 {% if applications %}
@@ -46,6 +102,9 @@
         </tbody>
     </table>
 </div>
+{% elif status_filter %}
+<div class="alert alert-info">No applications with status "{{ status_filter }}".
+    <a href="{{ url_for('home') }}">Clear filter</a></div>
 {% else %}
 <div class="alert alert-info">No applications yet. Click "Add application" to start.</div>
 {% endif %}
