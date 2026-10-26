@@ -32,4 +32,4 @@ A full-stack web app to track job applications, built to manage my own job searc
 - `applications.user_id` is a foreign key to `users.id`
 - A `CHECK` constraint limits status to valid values
 
-## Run Locally
+## Run Locallygit
