@@ -43,9 +43,15 @@ def login_required(view):
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
             return redirect(url_for("login"))
+        user = get_db().execute(
+            "SELECT id FROM users WHERE id = ?", (session["user_id"],)
+        ).fetchone()
+        if user is None:
+            session.clear()
+            flash("Please log in again.", "info")
+            return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped
-
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
