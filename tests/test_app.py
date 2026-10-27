@@ -211,3 +211,15 @@ def test_edit_rejects_invalid_status(client):
         follow_redirects=True,
     )
     assert b"Invalid status" in response.data
+
+def test_404_page(client):
+    response = client.get("/does-not-exist")
+    assert response.status_code == 404
+    assert b"Page not found" in response.data
+
+
+def test_edit_nonexistent_application(client):
+    signup(client)
+    login(client)
+    response = client.get("/edit/999", follow_redirects=True)
+    assert b"Application not found" in response.data

@@ -1,3 +1,4 @@
+import logging
 import os
 import sqlite3
 from functools import wraps
@@ -8,6 +9,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-key")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 app.config["DATABASE"] = "tracker.db"
 STATUSES = ["Applied", "Interview", "Offer", "Rejected"]
@@ -92,6 +98,7 @@ def login():
 
         if user is None or not check_password_hash(user["password_hash"], password):
             flash("Wrong username or password.", "danger")
+            logger.warning("Failed login attempt for username=%s", username)
         else:
             session.clear()
             session["user_id"] = user["id"]
@@ -228,6 +235,16 @@ def delete(app_id):
     flash("Application deleted.", "info")
     return redirect(url_for("home"))
 
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("error.html", code=404,
+                           message="Page not found."), 404
 
+
+@app.errorhandler(500)
+def server_error(error):
+    logger.exception("Unhandled server error")
+    return render_template("error.html", code=500,
+                           message="Something went wrong on our side."), 500
 if __name__ == "__main__":
     app.run(debug=True)
